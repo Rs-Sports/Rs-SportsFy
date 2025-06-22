@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>লাইভ টিভি - Rs Sports</title>
+
+  <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    .video-frame {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .video-wrapper {
+  width: 100%;
+  max-width: 1600px; /* আগে ছিল 1300px */
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 15px;
+  box-shadow: 0 0 35px rgba(0, 255, 0, 0.6);
+  overflow: hidden;
+}
+
+    .video-js {
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+    }
+
+    .marquee-container {
+      background: #1f1f1f;
+      color: #00ffcc;
+      padding: 10px 0;
+      font-weight: bold;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .category-bar {
+      text-align: center;
+      background: #232323;
+      color: #ffffff;
+      padding: 10px;
+      font-size: 18px;
+      margin-top: 10px;
+      border-top: 1px solid #333;
+      border-bottom: 1px solid #333;
+    }
+
+    .playlist-frame {
+      max-width: 1050px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+    }
+
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 20px;
+      justify-items: center;
+    }
+
+    .channel-item {
+      background: #fff;
+      border-radius: 50%;
+      height: 80px;
+      width: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 6px 3px rgba(0, 122, 255, 0.7);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .channel-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px 5px rgba(0, 255, 0, 0.6);
+    }
+
+    .channel-item img {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+
+    .back-button {
+      text-align: right;
+      margin: 15px;
+    }
+
+    .back-button a {
+      display: inline-block;
+      background: #f0100c;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 255, 100, 0.5);
+    }
+
+    .back-button a:hover {
+      background: #c90b09;
+    }
+
+    @media (max-width: 500px) {
+      .channel-item {
+        height: 70px;
+        width: 70px;
+      }
+
+      .channel-item img {
+        width: 65px;
+        height: 65px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-frame">
+    <div class="video-wrapper">
+      <video
+        id="live-video"
+        class="video-js vjs-default-skin"
+        controls
+        preload="auto"
+        data-setup='{}'>
+        <source src="https://spstr.abntv.live/hls/psstream.m3u8" type="application/x-mpegURL" />
+      </video>
+    </div>
+  </div>
+
+  <div class="marquee-container">
+    <marquee behavior="scroll" direction="left">
+      🔴 আজকের খেলা: আর্জেন্টিনা বনাম ব্রাজিল | রাত ৮:৩০ | Rs Sports অ্যাপে সরাসরি দেখুন!
+    </marquee>
+  </div>
+
+  <div class="category-bar">📺 জনপ্রিয় বাংলা চ্যানেল</div>
+
+  <div class="playlist-frame">
+    <div class="channel-grid">
+      <div class="channel-item" onclick="changeStream('https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709.m3u8')">
+        <img src="https://imgur.com/6qfnRA1.jpg" alt="B-TV">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1705/output/index.m3u8')">
+        <img src="https://imgur.com/tqJxOxB.jpg" alt="Ekattor TV">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://boishakhi.sonarbanglatv.com/boishakhi/boishakhitv/index.m3u8')">
+        <img src="https://imgur.com/RSUOaNs.jpg" alt="Boishakhi TV">
+      </div>
+<div class="channel-item" onclick="changeStream('https://live-bangla.akamaized.net/liveabr/pub-iobanglakp3sff/live_720p/chunks.m3u8')">
+        <img src="https://imgur.com/hZwimQt.jpeg" alt="CHANNEL4">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8')">
+        <img src="https://imgur.com/OPYCpt8.jpg" alt="CHANNEL5">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209869/master.m3u8')">
+        <img src="https://imgur.com/QgUjPdA.jpeg" alt="6">
+      </div>
+<div class="channel-item" onclick="changeStream('https://srknowapp.ncare.live/srktvhlswodrm/srktv.stream/playlist.m3u8')">
+        <img src="https://imgur.com/qmoX4Ea.jpeg" alt="7">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209622/master.m3u8')">
+        <img src="https://imgur.com/8k4AFOG.jpeg" alt="8">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209617/master.m3u8')">
+        <img src="https://imgur.com/Rc19of1.jpeg" alt="9">
+      </div>
+<div class="channel-item" onclick="changeStream('https://smart.bengaldigital.live/Star-jalsha/index.m3u8')">
+        <img src="https://imgur.com/ME3rS54.jpg" alt="10">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://smart.bengaldigital.live/sun-bangla-paid/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://imgur.com/OSOCJiJ.jpg" alt="11">
+      </div>
+      <div class="channel-item" onclick="changeStream('https://link3.m3u8')">
+        <img src="https://imgur.com/RSUOaNs.jpg" alt="12">
+      </div>
+      <!-- Add more channels similarly -->
+    </div>
+  </div>
+
+  <div class="back-button">
+    <a href="index.html">🔙</a>
+  </div>
+
+  <script>
+    function changeStream(url) {
+      const player = videojs('live-video');
+      player.src({ type: 'application/x-mpegURL', src: url });
+      player.play();
+    }
+  </script>
+
+</body>
+</html>

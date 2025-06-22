@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RS Movie Shop</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+    }
+
+    .video-container {
+      position: relative;
+      max-width: 960px;
+      margin: 20px auto;
+      box-shadow: 0 0 20px limegreen;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    video {
+      width: 100%;
+      display: block;
+      background: #000;
+    }
+
+    .live-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: red;
+      padding: 4px 10px;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    .running-text {
+      background: #111;
+      color: #0f0;
+      padding: 10px;
+      overflow: hidden;
+      white-space: nowrap;
+      max-width: 960px;
+      margin: 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px limegreen;
+      user-select: none;
+    }
+
+    .running-text span {
+      display: inline-block;
+      animation: scroll 12s linear infinite;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .category-buttons {
+      max-width: 960px;
+      margin: 10px auto 30px;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+
+    .category-buttons button {
+      background: #0f0;
+      border: none;
+      color: black;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 0 15px limegreen;
+      transition: background-color 0.3s, color 0.3s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      flex-grow: 1;
+      text-align: center;
+    }
+
+    .category-buttons button.active,
+    .category-buttons button:hover {
+      background-color: #32cd32;
+      color: #000;
+    }
+
+    .playlist {
+      max-width: 960px;
+      margin: 0 auto 30px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .playlist-item img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #0f0;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    .playlist-item img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    .load-more {
+      display: block;
+      margin: 20px auto 40px;
+      padding: 10px 25px;
+      font-size: 16px;
+      background: limegreen;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px lime;
+      transition: background-color 0.3s;
+    }
+
+    .load-more:hover {
+      background-color: #32cd32;
+    }
+
+    .back-button {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #ff4444;
+      color: white;
+      padding: 12px;
+      border-radius: 50%;
+      font-size: 24px;
+      text-align: center;
+      z-index: 999;
+      text-decoration: none;
+      user-select: none;
+      box-shadow: 0 0 10px #ff4444;
+      transition: background-color 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #ff0000;
+      box-shadow: 0 0 15px #ff0000;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #000;
+      color: #0f0;
+      font-size: 14px;
+      border-top: 1px solid #0f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-container" id="videoContainer">
+    <div class="live-badge">RS MOVIE</div>
+    <video controls id="mainVideo" poster="https://imgur.com/xf02eYu.jpeg">
+      <source id="videoSource" src="" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div class="running-text">
+    <span>Welcome to RS Movie Shop - Latest Natoks & Videos Streaming Now!</span>
+  </div>
+
+  <div class="category-buttons">
+    <button class="active" data-category="all" onclick="selectCategory('all', this)">ALL</button>
+    <button data-category="natok" onclick="selectCategory('natok', this)">ALL NATOK</button>
+    <button data-category="movie" onclick="selectCategory('movie', this)">ALL MOVIE</button>
+  </div>
+
+  <div class="playlist" id="playlist"></div>
+
+  <button class="load-more" onclick="loadMore()">Load More</button>
+
+  <a class="back-button" href="javascript:window.history.back();" title="Go Back">🔙</a>
+
+  <footer>
+    © 2025 RS Movie Shop | All rights reserved.
+  </footer>
+
+  <script>
+    const playlistData = [
+      { src: 'https://pixeldrain.com/api/file/hjapBiPM', poster: 'https://imgur.com/9ihNvRn.jpeg', category: 'natok' },
+      { src: 'https://pixeldrain.com/api/file/C1NdF58E', poster: 'https://imgur.com/g4A6nVc.jpeg', category: 'natok' },
+      { src: 'https://pixeldrain.com/api/file/hSZVLT6U', poster: 'https://imgur.com/lhEltz9.jpeg', category: 'natok' },
+      { src: 'https://pixeldrain.com/api/file/GHZEY4xf', poster: 'https://imgur.com/sDaxzMu.jpeg', category: 'natok' },
+      { src: 'https://pixeldrain.com/api/file/Uzazhj1i', poster: 'https://imgur.com/9fJe4Z1.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/y4xF2eJw', poster: 'https://imgur.com/lnQs27V.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/fEberdSa', poster: 'https://imgur.com/2PxATIN.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/BYZimvxT', poster: 'https://imgur.com/a9VyUkO.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/886RkCrU', poster: 'https://imgur.com/T1HrpVz.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/UqSoxP8x', poster: 'https://imgur.com/YedNy1s.jpeg', category: 'movie' },
+      { src: 'https://pixeldrain.com/api/file/VscJBT2m', poster: 'https://imgur.com/gqL3JdY.jpeg', category: 'movie' },
+    ];
+
+    let currentCategory = 'all';
+    let currentIndex = 0;
+    const itemsPerLoad = 4;
+
+    function playVideo(src, poster) {
+      const video = document.getElementById("mainVideo");
+      const source = document.getElementById("videoSource");
+      source.src = src;
+      video.poster = poster;
+      video.load();
+      video.play();
+    }
+
+    function filterByCategory(category) {
+      if (category === 'all') {
+        return playlistData;
+      } else {
+        return playlistData.filter(item => item.category === category);
+      }
+    }
+
+    function loadPlaylistItems(count = itemsPerLoad) {
+      const container = document.getElementById("playlist");
+      const filteredList = filterByCategory(currentCategory);
+      const nextItems = filteredList.slice(currentIndex, currentIndex + count);
+      nextItems.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "playlist-item";
+        div.innerHTML = `<img src="${item.poster}" onclick="playVideo('${item.src}', '${item.poster}')">`;
+        container.appendChild(div);
+      });
+      currentIndex += count;
+      // Hide load more if no more items
+      if (currentIndex >= filteredList.length) {
+        document.querySelector(".load-more").style.display = "none";
+      } else {
+        document.querySelector(".load-more").style.display = "block";
+      }
+    }
+
+    function loadMore() {
+      loadPlaylistItems(itemsPerLoad);
+    }
+
+    function selectCategory(category, btn) {
+      currentCategory = category;
+      currentIndex = 0;
+      const container = document.getElementById("playlist");
+      container.innerHTML = '';
+      loadPlaylistItems(itemsPerLoad);
+      // Active button style
+      document.querySelectorAll('.category-buttons button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Initial load
+    loadPlaylistItems(itemsPerLoad);
+  </script>
+</body>
+</html>

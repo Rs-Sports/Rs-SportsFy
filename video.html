@@ -1,274 +1,397 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RS Movie Shop</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>সিনেমা প্লে</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
-    }
-
-    .video-container {
-      position: relative;
-      max-width: 960px;
-      margin: 20px auto;
-      box-shadow: 0 0 20px limegreen;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    video {
-      width: 100%;
-      display: block;
-      background: #000;
-    }
-
-    .live-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: red;
-      padding: 4px 10px;
-      font-size: 14px;
-      font-weight: bold;
-      border-radius: 4px;
-      z-index: 1;
-    }
-
-    .running-text {
-      background: #111;
-      color: #0f0;
-      padding: 10px;
-      overflow: hidden;
-      white-space: nowrap;
-      max-width: 960px;
-      margin: 20px auto;
-      border-radius: 10px;
-      box-shadow: 0 0 10px limegreen;
-      user-select: none;
-    }
-
-    .running-text span {
-      display: inline-block;
-      animation: scroll 12s linear infinite;
-    }
-
-    @keyframes scroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    .category-buttons {
-      max-width: 960px;
-      margin: 10px auto 30px;
-      text-align: center;
+      font-family: sans-serif;
+      background: #121212;
+      color: #eee;
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: nowrap;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    .category-buttons button {
-      background: #0f0;
-      border: none;
-      color: black;
-      font-weight: bold;
-      padding: 8px 16px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 14px;
-      box-shadow: 0 0 15px limegreen;
-      transition: background-color 0.3s, color 0.3s;
-      white-space: nowrap;
+    .top-fixed {
       flex-shrink: 0;
-      flex-grow: 1;
-      text-align: center;
+      position: sticky;
+      top: 0;
+      background: #121212;
+      z-index: 100;
     }
 
-    .category-buttons button.active,
-    .category-buttons button:hover {
-      background-color: #32cd32;
-      color: #000;
-    }
-
-    .playlist {
-      max-width: 960px;
-      margin: 0 auto 30px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    .playlist-item img {
+    .slider-container, .video-container {
       width: 100%;
-      aspect-ratio: 16 / 9;
+      max-width: 800px;
+      aspect-ratio: 16/9;
+      margin: 10px auto 0;
       border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 0 12px #0f0;
-      transition: transform 0.2s, box-shadow 0.3s;
-    }
-
-    .playlist-item img:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #00ff00;
-    }
-
-    .load-more {
-      display: block;
-      margin: 20px auto 40px;
-      padding: 10px 25px;
-      font-size: 16px;
-      background: limegreen;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 0 10px lime;
-      transition: background-color 0.3s;
-    }
-
-    .load-more:hover {
-      background-color: #32cd32;
-    }
-
-    .back-button {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      background: #ff4444;
-      color: white;
-      padding: 12px;
-      border-radius: 50%;
-      font-size: 24px;
-      text-align: center;
-      z-index: 999;
-      text-decoration: none;
-      user-select: none;
-      box-shadow: 0 0 10px #ff4444;
-      transition: background-color 0.3s;
-    }
-
-    .back-button:hover {
-      background-color: #ff0000;
-      box-shadow: 0 0 15px #ff0000;
-    }
-
-    footer {
-      text-align: center;
-      padding: 20px;
+      overflow: hidden;
       background: #000;
-      color: #0f0;
+      box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+    }
+
+    .swiper, video { width: 100%; height: 100%; }
+    .swiper-slide { display: flex; align-items: center; justify-content: center; }
+    .swiper-slide img { width: 100%; height: 100%; object-fit: contain; }
+
+    .hidden { display: none; }
+
+    .category-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px auto 5px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      max-width: 800px;
+    }
+
+    .category-tab {
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ccc;
+      border-radius: 20px;
       font-size: 14px;
-      border-top: 1px solid #0f0;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      transition: 0.3s ease;
+      font-weight: 500;
+    }
+
+    .category-tab.active {
+      background: #ff5722;
+      color: #fff;
+      box-shadow: 0 0 10px #ff5722;
+      transform: scale(1.05);
+    }
+
+    /* Search box container */
+    .search-container {
+      max-width: 800px;
+      margin: 0 auto 10px;
+      text-align: center;
+    }
+
+    /* Search input */
+    #searchInput {
+      width: 60%;
+      max-width: 400px;
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+      background: #222;
+      color: #eee;
+      transition: box-shadow 0.3s ease;
+    }
+
+    #searchInput:focus {
+      box-shadow: 0 2px 12px rgba(255,87,34,0.7);
+    }
+
+    .grid-title-fixed {
+      text-align: center;
+      font-size: 20px;
+      background: #1e1e1e;
+      padding: 10px 20px;
+      margin: 10px auto 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      position: sticky;
+      top: 190px; /* Adjusted to leave space for search box */
+      z-index: 90;
+      max-width: 300px;
+    }
+
+    .scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 10px 80px;
+    }
+
+    .grid-section {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .card {
+      position: relative;
+      height: 200px;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #1e1e1e;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(255,255,255,0.3);
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .card-title {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      color: #eee;
+      text-align: center;
+      padding: 6px 5px;
+      font-weight: 600;
+      font-size: 16px;
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      user-select: none;
     }
   </style>
 </head>
 <body>
 
-  <div class="video-container" id="videoContainer">
-    <div class="live-badge">RS MOVIE</div>
-    <video controls id="mainVideo" poster="https://imgur.com/xf02eYu.jpeg">
-      <source id="videoSource" src="" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+  <!-- ==== Fixed Top Section ==== -->
+  <div class="top-fixed">
+    <div id="sliderBox" class="slider-container">
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide"><img src="https://imgur.com/b6y8Auu.jpeg" alt="Banner 1"></div>
+          <div class="swiper-slide"><img src="https://imgur.com/6COcj3K.jpeg" alt="Banner 2"></div>
+          <div class="swiper-slide"><img src="https://imgur.com/IieAo7I.jpeg" alt="Banner 3"></div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+      </div>
+    </div>
+
+    <div id="videoBox" class="video-container hidden">
+      <video id="videoPlayer" controls playsinline controlslist="nodownload" oncontextmenu="return false">
+        <source id="videoSource" src="" type="video/mp4" ></source>
+        আপনার ব্রাউজারে ভিডিও চলেনা।
+      </video>
+    </div>
+
+    <div class="category-tabs">
+      <button class="category-tab active" data-category="movie" onclick="showCategory('movie', event)">বাংলা মুভি</button>
+      <button class="category-tab" data-category="trending" onclick="showCategory('trending', event)">ট্রেন্ডিং</button>
+      <button class="category-tab" data-category="dubbed" onclick="showCategory('dubbed', event)">হিন্দি মুভি</button>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="সার্চ করুন..." oninput="performSearch()" />
+    </div>
+
+    <div class="grid-title-fixed">🎬 মুভি এবং নাটক</div>
   </div>
 
-  <div class="running-text">
-    <span>Welcome to RS Movie Shop - Latest Natoks & Videos Streaming Now!</span>
-  </div>
+  <!-- ==== Scrollable Playlist ==== -->
+  <div class="scroll-area">
+    <div class="grid-section">
 
-  <div class="category-buttons">
-    <button class="active" data-category="all" onclick="selectCategory('all', this)">ALL</button>
-    <button data-category="natok" onclick="selectCategory('natok', this)">ALL NATOK</button>
-    <button data-category="movie" onclick="selectCategory('movie', this)">ALL MOVIE</button>
-  </div>
+      <!-- Movie Category -->
+      <div class="category-grid" id="movie">
+        <div class="grid">
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/Z8L4pu8b')">
+            <img src="https://imgur.com/2v1kL9Y.jpeg" />
+            <div class="card-title">কানাগলি</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/1yqAyg7r')">
+            <img src="https://imgur.com/yiyEu6s.jpeg" />
+            <div class="card-title">চক্কর</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/FoVGdTSt')">
+            <img src="https://imgur.com/WTijkOc.jpeg" />
+            <div class="card-title">মহানগর</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pub-74c2d8d03dab4db091fc2d64bfc18a81.r2.dev/Taandob.2025.1080p.WeB-DL.Bangladeshi.x264.AAC-SkymoviesHD.Dance.mkv')">
+            <img src="https://imgur.com/rRphxmJ.jpeg" />
+            <div class="card-title">Taandob</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://www.profitableratecpm.com/hdkza3qzv?key=a7dccf049cbf829f60f8197705b9fc5c')">
+            <img src="https://imgur.com/WvxoJZs.jpeg" />
+            <div class="card-title">Borbaad</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://www.profitableratecpm.com/hdkza3qzv?key=a7dccf049cbf829f60f8197705b9fc5c')">
+            <img src="https://imgur.com/85I8VvY.jpeg" />
+            <div class="card-title">Dagi</div>
+          </div>
+        </div>
+      </div>
 
-  <div class="playlist" id="playlist"></div>
+      <!-- Trending Category -->
+      <div class="category-grid hidden" id="trending">
+        <div class="grid">
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/NL7dgzDS')">
+            <img src="https://imgur.com/xECuGPV.jpeg" />
+            <div class="card-title">মুভি ১</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/6v3pnmuY')">
+            <img src="https://imgur.com/b4Q6izq.jpeg" />
+            <div class="card-title">হাউ সুইট</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://time7517jg.rustimfahum.workers.dev/0:/ottbangla.store-Ghumpori%202025Bengali%20Chorki%20WEB-DL.mkv')">
+            <img src="https://imgur.com/JqRE7DA.jpeg" />
+            <div class="card-title">ঘুমপরী</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/demo4')">
+            <img src="https://imgur.com/demo4.jpeg" />
+            <div class="card-title">মুভি ৪</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/demo5')">
+            <img src="https://imgur.com/demo5.jpeg" />
+            <div class="card-title">মুভি ৫</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/demo6')">
+            <img src="https://imgur.com/demo6.jpeg" />
+            <div class="card-title">মুভি ৬</div>
+          </div>
+        </div>
+      </div>
 
-  <button class="load-more" onclick="loadMore()">Load More</button>
+      <!-- Dubbed Category -->
+      <div class="category-grid hidden" id="dubbed">
+        <div class="grid">
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/BY1jTRFH')">
+            <img src="https://imgur.com/ybif4pi.jpeg" />
+            <div class="card-title">Vikrant Rona</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/wYdqR5fy')">
+            <img src="https://imgur.com/B4e1VGg.jpeg" />
+            <div class="card-title">Good Bad</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/pLuwqi8g')">
+            <img src="https://imgur.com/xenqcjT.jpeg" />
+            <div class="card-title">Viduthalai</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/AvosQXVr')">
+            <img src="https://imgur.com/umOCAEg.jpeg" />
+            <div class="card-title">ROBINHOOD</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/iDAFfvWs')">
+            <img src="https://imgur.com/cHxYDmw.jpeg" />
+            <div class="card-title">BHAIRAVAM</div>
+          </div>
+          <div class="card" onclick="playVideoWithAd('https://pixeldrain.com/api/file/BiYHFQwY')">
+            <img src="https://imgur.com/h3gGUx6.jpeg" />
+            <div class="card-title">Saiyaara</div>
+          </div>
+        </div>
+      </div>
 
-  <a class="back-button" href="javascript:window.history.back();" title="Go Back">🔙</a>
-
-  <footer>
-    © 2025 RS Movie Shop | All rights reserved.
-  </footer>
-
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
-    const playlistData = [
-      { src: 'https://pixeldrain.com/api/file/hjapBiPM', poster: 'https://imgur.com/9ihNvRn.jpeg', category: 'natok' },
-      { src: 'https://pixeldrain.com/api/file/C1NdF58E', poster: 'https://imgur.com/g4A6nVc.jpeg', category: 'natok' },
-      { src: 'https://pixeldrain.com/api/file/hSZVLT6U', poster: 'https://imgur.com/lhEltz9.jpeg', category: 'natok' },
-      { src: 'https://pixeldrain.com/api/file/GHZEY4xf', poster: 'https://imgur.com/sDaxzMu.jpeg', category: 'natok' },
-      { src: 'https://pixeldrain.com/api/file/Uzazhj1i', poster: 'https://imgur.com/9fJe4Z1.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/y4xF2eJw', poster: 'https://imgur.com/lnQs27V.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/fEberdSa', poster: 'https://imgur.com/2PxATIN.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/BYZimvxT', poster: 'https://imgur.com/a9VyUkO.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/886RkCrU', poster: 'https://imgur.com/T1HrpVz.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/UqSoxP8x', poster: 'https://imgur.com/YedNy1s.jpeg', category: 'movie' },
-      { src: 'https://pixeldrain.com/api/file/VscJBT2m', poster: 'https://imgur.com/gqL3JdY.jpeg', category: 'movie' },
-    ];
+    const tabs = document.querySelectorAll(".category-tab");
 
-    let currentCategory = 'all';
-    let currentIndex = 0;
-    const itemsPerLoad = 4;
+    function showCategory(id, event) {
+      const allSections = document.querySelectorAll(".category-grid");
+      allSections.forEach(section => section.classList.add("hidden"));
 
-    function playVideo(src, poster) {
-      const video = document.getElementById("mainVideo");
-      const source = document.getElementById("videoSource");
-      source.src = src;
-      video.poster = poster;
-      video.load();
-      video.play();
-    }
-
-    function filterByCategory(category) {
-      if (category === 'all') {
-        return playlistData;
-      } else {
-        return playlistData.filter(item => item.category === category);
+      const selected = document.getElementById(id);
+      if (selected) {
+        selected.classList.remove("hidden");
       }
+
+      tabs.forEach(btn => btn.classList.remove("active"));
+      if (event && event.target) {
+        event.target.classList.add("active");
+      }
+
+      // সার্চ বক্স ক্লিয়ার করো এবং সব কার্ড দেখাও
+      document.getElementById('searchInput').value = '';
+      clearSearch();
     }
 
-    function loadPlaylistItems(count = itemsPerLoad) {
-      const container = document.getElementById("playlist");
-      const filteredList = filterByCategory(currentCategory);
-      const nextItems = filteredList.slice(currentIndex, currentIndex + count);
-      nextItems.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "playlist-item";
-        div.innerHTML = `<img src="${item.poster}" onclick="playVideo('${item.src}', '${item.poster}')">`;
-        container.appendChild(div);
+    const videoBox = document.getElementById("videoBox");
+    const sliderBox = document.getElementById("sliderBox");
+    const player = document.getElementById("videoPlayer");
+
+    function playVideoWithAd(url) {
+  sliderBox.classList.add("hidden");
+  videoBox.classList.remove("hidden");
+  player.src = url;
+  player.load();
+  player.play();
+}
+
+    player.addEventListener("ended", () => {
+      videoBox.classList.add("hidden");
+      sliderBox.classList.remove("hidden");
+      player.src = "";
+    });
+
+    new Swiper('.swiper', {
+      loop: true,
+      autoplay: { delay: 3000 },
+      pagination: { el: '.swiper-pagination', clickable: true },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      }
+    });
+
+    // সার্চ ফাংশন
+    function performSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+      // খালি হলে সব কার্ড দেখাও
+      if (!query) {
+        clearSearch();
+        return;
+      }
+
+      // সক্রিয় ক্যাটাগরির id পেতে
+      const activeTab = document.querySelector('.category-tab.active');
+      if (!activeTab) return;
+
+      const activeCategoryId = activeTab.getAttribute('data-category');
+      if (!activeCategoryId) return;
+
+      const activeCategory = document.getElementById(activeCategoryId);
+      if (!activeCategory) return;
+
+      activeCategory.querySelectorAll('.card').forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        if (title.includes(query)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
       });
-      currentIndex += count;
-      // Hide load more if no more items
-      if (currentIndex >= filteredList.length) {
-        document.querySelector(".load-more").style.display = "none";
-      } else {
-        document.querySelector(".load-more").style.display = "block";
-      }
     }
 
-    function loadMore() {
-      loadPlaylistItems(itemsPerLoad);
+    // সার্চ ক্লিয়ার করলে সব কার্ড দেখানোর ফাংশন
+    function clearSearch() {
+      document.querySelectorAll('.category-grid').forEach(section => {
+        section.querySelectorAll('.card').forEach(card => {
+          card.style.display = 'block';
+        });
+      });
     }
-
-    function selectCategory(category, btn) {
-      currentCategory = category;
-      currentIndex = 0;
-      const container = document.getElementById("playlist");
-      container.innerHTML = '';
-      loadPlaylistItems(itemsPerLoad);
-      // Active button style
-      document.querySelectorAll('.category-buttons button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    // Initial load
-    loadPlaylistItems(itemsPerLoad);
   </script>
 </body>
 </html>

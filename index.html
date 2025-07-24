@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RS SportsFy</title>
   <link href="https://vjs.zencdn.net/8.20.0/video-js.css" rel="stylesheet" />
   <style>
+    * { box-sizing: border-box; }
     body {
       background: #111;
       color: #fff;
       font-family: 'Arial', sans-serif;
       margin: 0;
-      padding-bottom: 100px;
-      overflow-x: hidden;
     }
     header {
       display: flex;
@@ -20,13 +19,12 @@
       align-items: center;
       background: #1a1a1a;
       padding: 12px 16px;
-      position: relative;
-      z-index: 1001;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1101;
+      box-shadow: 0 2px 8px rgba(0,255,102,0.4);
     }
-    header h1 {
-      font-size: 20px;
-      margin: 0;
-    }
+    header h1 { font-size: 20px; margin: 0; color: #00ff66; }
     .icon {
       font-size: 24px;
       cursor: pointer;
@@ -35,57 +33,77 @@
     }
     #sidebar {
       position: fixed;
-      top: 0;
-      left: -250px;
+      top: 60px;
+      left: -260px;
       width: 250px;
-      height: 100vh;
+      height: calc(100vh - 60px);
       background: #111;
       border-right: 2px solid #00ff66;
       padding-top: 20px;
-      box-sizing: border-box;
       transition: left 0.3s ease;
       z-index: 1100;
-      overflow-y: auto;
     }
-    #sidebar.active {
-      left: 0;
+    #sidebar.active { left: 0; }
+    #sidebar > div {
+      text-align: center;
+      padding: 15px 10px;
     }
-    #sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    #sidebar > div img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      box-shadow: 0 0 16px #00ff66;
+      object-fit: cover;
     }
+    #sidebar ul { list-style: none; padding: 0; margin: 0; }
     #sidebar ul li {
       padding: 12px 20px;
       border-bottom: 1px solid #222;
       cursor: pointer;
       color: #00ff66;
-      font-weight: bold;
-      transition: background-color 0.2s ease;
     }
-    #sidebar ul li:hover {
-      background-color: #004d00;
+    #sidebar ul li:hover { background-color: #004d00; }
+    #sidebar .copyright {
+      text-align: center;
+      padding: 12px;
+      font-size: 13px;
+      color: #888;
+      border-top: 1px solid #222;
+      margin-top: 20px;
     }
     #overlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.6);
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease;
-      z-index: 1050;
+      z-index: 1099;
     }
     #overlay.active {
       opacity: 1;
       visibility: visible;
     }
     .video-js {
-      width: 100% !important;
+      width: 100%;
+      height: 200px;
       border-radius: 12px;
       box-shadow: 0 0 12px rgba(0, 255, 102, 0.4);
-      margin-top: 10px;
-      background: black;
+      margin-top: 60px;
+    }
+    .viewer-count {
+      position: fixed;
+      top: 65px;
+      left: 10px;
+      background: red;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      z-index: 9999;
+      user-select: none;
+      font-family: 'Arial', sans-serif;
     }
     .marquee {
       background: #222;
@@ -97,230 +115,187 @@
     .marquee span {
       display: inline-block;
       padding-left: 100%;
-      animation: scroll 10s linear infinite;
+      animation: scroll 12s linear infinite;
     }
     @keyframes scroll {
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
+    .category-wrapper {
+      margin: 10px 12px;
+      background: #181818;
+      border: 2px solid #00ff66;
+      border-radius: 12px;
+      padding: 10px;
+      position: fixed;
+      top: 300px;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
     .category-tabs {
       display: flex;
       justify-content: space-around;
-      padding: 10px;
-      background: #181818;
-      border-bottom: 1px solid #333;
+      gap: 5px;
     }
     .category-tabs button {
-      background: #222;
-      border: 1px solid #00ff66;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .category-tabs button.active {
-      background: #00ff66;
-      color: #000;
-      font-weight: bold;
-    }
-    .match-card {
-      border: 1px solid #00ff66;
-      margin: 10px;
-      border-radius: 10px;
-      padding: 12px;
-      background: #1b1b1b;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .match-card:hover {
-      background-color: #004d00;
-    }
-    .match-meta {
-      font-size: 13px;
-      color: #ccc;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .teams {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .team-logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-    .vs-container {
-      text-align: center;
-      flex-grow: 1;
-      margin: 0 10px;
-    }
-    .live-indicator {
-      color: red;
-      font-weight: bold;
-      margin-bottom: 4px;
-      animation: blink 1.5s infinite;
-    }
-    .vs-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #00ff66;
-    }
-    .bottom-buttons {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #000;
-      border-top: 1px solid #00ff66;
-      display: flex;
-      justify-content: space-evenly;
-      padding: 12px 0;
-      z-index: 1000;
-    }
-    .bottom-buttons button {
       background: #111;
-      color: #00ff66;
       border: 2px solid #00ff66;
-      padding: 10px 22px;
-      border-radius: 30px;
-      font-size: 15px;
+      color: #00ff66;
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 16px;
       font-weight: bold;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 0 6px rgba(0, 255, 102, 0.25);
       transition: all 0.3s ease;
     }
-    .bottom-buttons button:hover {
-      background: #00ff66;
+    .category-tabs button.active {
+      background: linear-gradient(45deg, #00ff66, #00ffff);
       color: #000;
+      border: 2px solid transparent;
+      box-shadow: 0 0 12px rgba(0, 255, 102, 0.6);
     }
-    .dot {
-      width: 12px;
-      height: 12px;
-      background-color: #ff3b3b;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #ff3b3b;
-      animation: blink 1.5s infinite;
-      flex-shrink: 0;
+    .scroll-area {
+      position: absolute;
+      top: 370px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      overflow-y: auto;
+      padding-bottom: 80px;
     }
-    @keyframes blink {
-      0%, 50%, 100% { opacity: 1; }
-      25%, 75% { opacity: 0.3; }
+    #matches {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      padding: 10px;
     }
+    .match-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 2px solid #00ff66;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,255,102,0.3);
+      transition: transform 0.2s ease;
+      background: #000;
+      display: block;
+    }
+    .match-box:hover {
+      transform: scale(1.03);
+    }
+    .match-box.live {
+      border: 2px solid red;
+    }
+    .match-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .match-tag {
+  position: absolute;
+  font-weight: bold;
+  font-size: 10px;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 🟥 LIVE ব্যাজ (সেন্টারে গোল, ব্লিংক করে) */
+.match-tag.live-indicator {
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  background: red;
+  padding: 4px 12px;
+  border-radius: 16px;
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+  animation: blink-live 1s infinite;
+}
+
+/* 📅 সময় ব্যাজ (ইমেজের নিচে, আয়তাকার) */
+.match-tag.date-tag {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transform: none;
+  padding: 6px 10px;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border-top: 1px solid #00ff66;
+  border-radius: 0 0 8px 8px;
+}
+@keyframes blink-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
   </style>
 </head>
 <body>
+  <div class="viewer-count" id="viewerCount">LIVE: 0</div>
   <header>
     <div class="icon" id="menu-toggle">☰</div>
     <h1>RS SportsFy</h1>
-    <div class="icon reload-btn" onclick="location.reload();">⟳</div>
+    <div class="icon" onclick="location.reload();">⟳</div>
   </header>
-
   <nav id="sidebar">
-    <div style="text-align: center; padding: 20px 0; background: rgba(0, 255, 102, 0.05); margin: 0 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,255,102,0.2), inset 0 0 8px rgba(0,255,102,0.1); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
-      <img src="https://imgur.com/8IVuSvI.jpeg" alt="Logo" style="width: 90px; height: 90px; border-radius: 50%; box-shadow: 0 0 12px #00ff66;" />
-    </div>
+    <div><img src="https://i.imgur.com/8IVuSvI.jpeg" alt="Logo" /></div>
     <ul>
-      <li onclick="alert('Contact us: info.rssportsfy@gmail.com'); closeSidebar();">☎️ Contact</li>
       <li onclick="alert('We are a free live sports streaming platform.'); closeSidebar();">ℹ️ About</li>
-      <li onclick="window.open('https://t.me/rs_sports_live', '_blank'); closeSidebar();">📢 Join Telegram</li>
-      <li onclick="window.open('https://www.facebook.com/profile.php?id=61557053916041', '_blank'); closeSidebar();">📘 Facebook Page</li>
-      <li onclick="alert('We respect your privacy.'); closeSidebar();">🔒 Privacy Policy</li>
+      <li onclick="alert('We respect your privacy.'); closeSidebar();">🔒 Privacy</li>
+      <li onclick="window.open('https://facebook.com', '_blank'); closeSidebar();">📘 Facebook</li>
+      <li onclick="window.open('https://t.me', '_blank'); closeSidebar();">📢 Telegram</li>
+      <li onclick="alert('Contact: info@rssportsfy.com'); closeSidebar();">☎️ Contact</li>
       <li onclick="navigator.share ? navigator.share({ title: 'RS SportsFy', text: 'Watch live!', url: location.href }) : alert('Not supported'); closeSidebar();">🔗 Share</li>
     </ul>
-    <div style="text-align:center; padding: 12px; font-size: 13px; color: #888; border-top: 1px solid #222;">
-      © 2025 RS SportsFy
-    </div>
+    <div class="copyright">© 2025 RS SportsFy</div>
   </nav>
-
   <div id="overlay"></div>
   <video id="hlsPlayer" class="video-js vjs-default-skin" controls autoplay preload="auto" playsinline></video>
-
-  <div class="marquee">
-    <span>আজকের খেলা: বাংলাদেশ বনাম শ্রীলঙ্কা (LIVE)</span>
+  <div class="marquee"><span>আজকের খেলা: বাংলাদেশ বনাম শ্রীলঙ্কা (LIVE)</span></div>
+  <div class="category-wrapper">
+    <div class="category-tabs">
+      <button class="active" onclick="filterMatches('all', event)">All</button>
+      <button onclick="filterMatches('cricket', event)">🏏 Cricket</button>
+      <button onclick="filterMatches('football', event)">⚽ Football</button>
+      <button onclick="filterMatches('upcoming', event)">🕒 Upcoming</button>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div id="matches"></div>
   </div>
 
-  <div class="category-tabs">
-    <button class="active" onclick="filterMatches('all', event)">All</button>
-    <button onclick="filterMatches('cricket', event)">🏏 Cricket</button>
-    <button onclick="filterMatches('football', event)">⚽ Football</button>
-    <button onclick="filterMatches('upcoming', event)">🕒 Upcoming</button>
-  </div>
-
-  <div id="matches"></div>
-
-  <!-- ✅ Updated Football Button -->
-  <div class="bottom-buttons">
-    <button onclick="window.open('Category.html', '_blank')">📺 Category</button>
-    <button onclick="filterMatches('all', event)">
-      <span class="dot"></span> Live
-    </button>
-    <button onclick="window.open('video.html', '_blank')">🎬 Movies</button>
-  </div>
-
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://vjs.zencdn.net/8.20.0/video.min.js"></script>
   <script>
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    document.getElementById('menu-toggle').addEventListener('click', () => {
-      sidebar.classList.add('active');
-      overlay.classList.add('active');
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhCpb9RsVdf9jsFqJFtJQBXMz5uZBj4xo",
+      authDomain: "rs-sportsfy-34ab8.firebaseapp.com",
+      databaseURL: "https://rs-sportsfy-34ab8-default-rtdb.firebaseio.com",
+      projectId: "rs-sportsfy-34ab8",
+      storageBucket: "rs-sportsfy-34ab8.appspot.com",
+      messagingSenderId: "202502196950",
+      appId: "1:202502196950:web:40192666f51699a9e74377"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const userRef = db.ref("viewers");
+    const thisUser = userRef.push();
+    thisUser.set(true);
+    thisUser.onDisconnect().remove();
+    userRef.on("value", snapshot => {
+      const count = snapshot.numChildren();
+      document.getElementById("viewerCount").innerText = "LIVE: " + count;
     });
-    overlay.addEventListener('click', closeSidebar);
-    function closeSidebar() {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-    }
-
-    const data = {
-  defaultStream: "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/index.m3u8",
-  marquee: "আজকের খেলা: বাংলাদেশ বনাম শ্রীলঙ্কা (LIVE)",
-  matches: {
-    match1: {
-      category: "cricket",
-      title: "বাংলাদেশ বনাম শ্রীলঙ্কা",
-      time: "রাত ৪:৩০",
-      timeColor: "#00ff66",
-      team1Logo: "https://imgur.com/iBzSWzK.jpeg",
-      team1Name: "বাংলাদেশ",
-      team2Logo: "https://imgur.com/iBzSWzK.jpeg",
-      team2Name: "শ্রীলঙ্কা",
-      streamURL: "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/index.m3u8",
-      isLive: true
-    },
-    match2: {
-      category: "football",
-      title: "আর্জেন্টিনা বনাম ব্রাজিল",
-      time: "রাত ২:০০",
-      timeColor: "#ffcc00",
-      team1Logo: "https://upload.wikimedia.org/wikipedia/en/1/1f/Argentine_Football_Association_logo.svg",
-      team1Name: "আর্জেন্টিনা",
-      team2Logo: "https://upload.wikimedia.org/wikipedia/en/b/bf/Brazil_national_football_team_logo.svg",
-      team2Name: "ব্রাজিল",
-      streamURL: "https://32tech0steam0dp01.org/live/UK_SkySportsCricketFHD/chunks.m3u8",
-      isLive: true
-    },
-    match3: {
-      category: "upcoming",
-      title: "ইংল্যান্ড বনাম ফ্রান্স",
-      time: "আগামীকাল সন্ধ্যা ৭টা",
-      timeColor: "#999999",
-      team1Logo: "https://upload.wikimedia.org/wikipedia/en/b/be/England_national_football_team_three_lions.svg",
-      team1Name: "ইংল্যান্ড",
-      team2Logo: "https://upload.wikimedia.org/wikipedia/en/c/c3/France_national_football_team_seal.svg",
-      team2Name: "ফ্রান্স",
-      streamURL: "https://bostaflix.vercel.app/api/sliv.m3u8?id=sony_aath",
-      isLive: false
-    }
-  }
-};
 
     const player = videojs('hlsPlayer', {
       fluid: true,
@@ -330,52 +305,122 @@
       liveui: true
     });
 
-    function playMatch(url) {
-      if (!url) {
-        alert('স্ট্রিম লিংক পাওয়া যায়নি।');
-        return;
-      }
-      player.src({ src: url, type: 'application/x-mpegURL' });
-      player.play();
-    }
-
-    function filterMatches(category, event) {
-      document.querySelectorAll('.category-tabs button').forEach(btn => btn.classList.remove('active'));
-      if (event && event.target) {
-        event.target.classList.add('active');
-      }
-
-      const matchesDiv = document.getElementById('matches');
-      matchesDiv.innerHTML = '';
-      Object.values(data.matches).forEach(match => {
-        if (category === 'all' || match.category === category) {
-          const card = document.createElement('div');
-          card.className = 'match-card';
-          card.onclick = () => playMatch(match.streamURL);
-          card.innerHTML = `
-            <div class="match-meta">
-              <span>${match.title}</span>
-              <span style="color: ${match.timeColor};">${match.time}</span>
-            </div>
-            <div class="teams">
-              <img src="${match.team1Logo}" class="team-logo" alt="${match.team1Name}">
-              <div class="vs-container">
-                ${match.isLive ? '<div class="live-indicator">LIVE</div>' : ''}
-                <div class="vs-text">${match.team1Name} VS ${match.team2Name}</div>
-              </div>
-              <img src="${match.team2Logo}" class="team-logo" alt="${match.team2Name}">
-            </div>
-          `;
-          matchesDiv.appendChild(card);
+    const data = {
+      defaultStream: "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/index.m3u8",
+      marquee: "আজকের খেলা: বাংলাদেশ বনাম পাকিস্তান  (LIVE)",
+      matches: {
+        match1: {
+          category: "cricket",
+          streamURL: "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/index.m3u8",
+          thumbnail: "https://imgur.com/zRVKfcp.jpg",
+          isLive: false,
+          utcTime: "2025-07-16T13:30:00Z"
+        },
+        match2: {
+          category: "upcoming",
+          streamURL: "https://tvsen6.aynaott.com/tsportsfhd/tracks-v1a1/mono.ts.m3u8",
+          thumbnail: "https://imgur.com/lOcJAcm.jpg",
+          isLive: false,
+          utcTime: "2025-07-24T12:00:00Z"
+        },
+match4: {
+          category: "cricket",
+          streamURL: "https://edge3-moblive.yuppcdn.net/drm/smil:tencricketdrm.smil/index.m3u8",
+          thumbnail: "https://imgur.com/BYyTyPE.jpg",
+          isLive: true,
+          utcTime: "2025-07-20T12:00:00Z"
+        },
+        match3: {
+          category: "cricket",
+          streamURL: "https://tiger-hub.vercel.app/WillowHD/tracks-v1a1/mono.m3u8",
+          thumbnail: "https://imgur.com/NxkFMXE.jpg",
+          isLive: false,
+          utcTime: "2025-07-16T14:00:00Z"
         }
+      }
+    };
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+    }
+    document.getElementById('menu-toggle').onclick = () => {
+      document.getElementById('sidebar').classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+    };
+    document.getElementById('overlay').onclick = closeSidebar;
+
+    function formatDateTime(utcString) {
+      if (!utcString) return 'Date not set';
+      const date = new Date(utcString);
+      return date.toLocaleString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit'
       });
     }
 
-    window.onload = () => {
-      document.querySelector('.marquee span').innerText = data.marquee;
-      playMatch(data.defaultStream);
-      filterMatches('all');
+    function renderMatches(filter = 'all') {
+  const matchesDiv = document.getElementById('matches');
+  matchesDiv.innerHTML = '';
+
+  // Object.entries দিয়ে অ্যারে আকারে ম্যাচ নেওয়া
+  let matchesArray = Object.entries(data.matches);
+
+  // filter অনুযায়ী ফিল্টার করে রাখো (উদাহরণস্বরূপ 'upcoming', 'cricket' ইত্যাদি)
+  matchesArray = matchesArray.filter(([key, match]) => {
+    if (filter === 'all') return true;
+    if (filter === 'upcoming') return !match.isLive;
+    return match.category === filter;
+  });
+
+  // এখন ম্যাচগুলোকে isLive এর ভিত্তিতে সাজাও (live প্রথমে)
+  matchesArray.sort((a, b) => {
+    // যদি a লাইভ আর b না হয়, তাহলে a আগে
+    if (a[1].isLive && !b[1].isLive) return -1;
+    // যদি b লাইভ আর a না হয়, তাহলে b আগে
+    if (!a[1].isLive && b[1].isLive) return 1;
+    return 0; // অন্যথায় অর্ডার অপরিবর্তিত
+  });
+
+  for (const [key, match] of matchesArray) {
+    const box = document.createElement('div');
+    box.className = 'match-box' + (match.isLive ? ' live' : '');
+    box.title = (match.isLive ? 'LIVE | ' : '') + formatDateTime(match.utcTime);
+    box.onclick = () => {
+      player.src({ src: match.streamURL, type: 'application/x-mpegURL' });
+      player.play();
+      closeSidebar();
+    };
+
+    const img = document.createElement('img');
+    img.src = match.thumbnail;
+    img.alt = `${match.category} match thumbnail`;
+    box.appendChild(img);
+
+    const tag = document.createElement('div');
+tag.classList.add('match-tag');
+
+if (match.isLive) {
+  tag.classList.add('live-indicator');
+  tag.textContent = 'LIVE';
+} else {
+  tag.classList.add('date-tag');
+  tag.textContent = formatDateTime(match.utcTime);
+}
+
+    box.appendChild(tag);
+    matchesDiv.appendChild(box);
+  }
+}
+
+    function filterMatches(category, event) {
+      document.querySelectorAll('.category-tabs button').forEach(btn => btn.classList.remove('active'));
+      if(event) event.currentTarget.classList.add('active');
+      renderMatches(category);
     }
+
+    player.src({ src: data.defaultStream, type: 'application/x-mpegURL' });
+    renderMatches('all');
   </script>
 </body>
 </html>

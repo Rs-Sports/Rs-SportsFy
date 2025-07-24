@@ -2,12 +2,12 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>লাইভ টিভি - Rs Sports</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RS SportsFy - Live TV</title>
   <link href="https://vjs.zencdn.net/8.5.2/video-js.css" rel="stylesheet" />
   <script src="https://vjs.zencdn.net/8.5.2/video.min.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -20,17 +20,33 @@
     .video-frame {
       display: flex;
       justify-content: center;
-      padding: 20px;
+      margin-top: 10px;
+      position: relative;
     }
 
     .video-wrapper {
-  width: 100%;
-  max-width: 1600px; /* আগে ছিল 1300px */
-  aspect-ratio: 16 / 9;
-  background: #000;
-  border-radius: 15px;
-  box-shadow: 0 0 35px rgba(0, 255, 0, 0.6);
-  overflow: hidden;
+      width: 100%;
+      max-width: 1280px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 15px;
+      box-shadow: 0 0 35px rgba(0, 255, 0, 0.6);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .viewer-count {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  background: #ff0000; /* 🔴 লাল ব্যাকগ্রাউন্ড */
+  padding: 4px 10px;
+  border-radius: 10px;
+  color: #ffffff; /* ⚪ সাদা টেক্সট */
+  font-weight: 600;
+  font-size: 12px; /* ছোট আকার */
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.4);
+  z-index: 10;
 }
 
     .video-js {
@@ -51,12 +67,29 @@
     .category-bar {
       text-align: center;
       background: #232323;
-      color: #ffffff;
       padding: 10px;
-      font-size: 18px;
-      margin-top: 10px;
       border-top: 1px solid #333;
       border-bottom: 1px solid #333;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .category-bar button {
+      background-color: #333;
+      color: #00ffcc;
+      border: none;
+      padding: 8px 16px;
+      margin: 4px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-block;
+      transition: 0.3s;
+    }
+
+    .category-bar button:hover {
+      background-color: #00ffcc;
+      color: #000;
     }
 
     .playlist-frame {
@@ -67,11 +100,13 @@
       border-radius: 20px;
       box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
       border: 1px solid rgba(0, 255, 0, 0.2);
+      max-height: 380px;
+      overflow-y: auto;
     }
 
     .channel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
       justify-items: center;
     }
@@ -101,26 +136,6 @@
       object-fit: contain;
     }
 
-    .back-button {
-      text-align: right;
-      margin: 15px;
-    }
-
-    .back-button a {
-      display: inline-block;
-      background: #f0100c;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0, 255, 100, 0.5);
-    }
-
-    .back-button a:hover {
-      background: #c90b09;
-    }
-
     @media (max-width: 500px) {
       .channel-item {
         height: 70px;
@@ -138,69 +153,92 @@
 
   <div class="video-frame">
     <div class="video-wrapper">
-      <video
-        id="live-video"
-        class="video-js vjs-default-skin"
-        controls
-        preload="auto"
-        data-setup='{}'>
-        <source src="https://spstr.abntv.live/hls/psstream.m3u8" type="application/x-mpegURL" />
+      <div class="viewer-count" id="viewerCount"> LIVE : 0</div>
+      <video id="live-video" class="video-js vjs-default-skin" controls preload="auto" data-setup="{}">
+        <source src="https://spstr.abntv.live/hls/psstream.m3u8" type="application/x-mpegURL">
       </video>
     </div>
   </div>
 
   <div class="marquee-container">
-    <marquee behavior="scroll" direction="left">
-      🔴 আজকের খেলা: আর্জেন্টিনা বনাম ব্রাজিল | রাত ৮:৩০ | Rs Sports অ্যাপে সরাসরি দেখুন!
-    </marquee>
+    <marquee behavior="scroll" direction="left">🔴 আজকের খেলা দেখুন | Rs SportsFy অ্যাপে সরাসরি দেখুন!</marquee>
   </div>
 
-  <div class="category-bar">📺 জনপ্রিয় বাংলা চ্যানেল</div>
+  <div class="category-bar">
+  <button onclick="filterChannels('all')">All</button>
+  <button onclick="filterChannels('movies')">Movies</button>
+  <button onclick="filterChannels('cartoon')">Cartoon</button>
+  <button onclick="filterChannels('drama')">Drama</button>
+  <button onclick="filterChannels('music')">Music</button>
+</div>
 
   <div class="playlist-frame">
     <div class="channel-grid">
-      <div class="channel-item" onclick="changeStream('https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1709/output/1709.m3u8')">
-        <img src="https://imgur.com/6qfnRA1.jpg" alt="B-TV">
+      <!-- ✅ চ্যানেল প্লেলিস্ট এখানে -->
+      <div class="channel-item" data-category="movies" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209593/master.m3u8')">
+        <img src="https://imgur.com/plcL9BJ.jpg" alt="1" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://d1e7rcqq4o2ma.cloudfront.net/bpk-tv/1705/output/index.m3u8')">
-        <img src="https://imgur.com/tqJxOxB.jpg" alt="Ekattor TV">
+      <div class="channel-item" data-category="movies" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209612/master.m3u8')">
+        <img src="https://imgur.com/q9nJBfe.jpg" alt="2" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://boishakhi.sonarbanglatv.com/boishakhi/boishakhitv/index.m3u8')">
-        <img src="https://imgur.com/RSUOaNs.jpg" alt="Boishakhi TV">
+      <div class="channel-item" data-category="movies" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209627/master.m3u8')">
+        <img src="https://imgur.com/NUFoX4Z.jpg" alt="3" />
       </div>
-<div class="channel-item" onclick="changeStream('https://live-bangla.akamaized.net/liveabr/pub-iobanglakp3sff/live_720p/chunks.m3u8')">
-        <img src="https://imgur.com/hZwimQt.jpeg" alt="CHANNEL4">
+      <div class="channel-item" data-category="music" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209587/master.m3u8')">
+        <img src="https://imgur.com/iRYiSWp.jpg" alt="4" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8')">
-        <img src="https://imgur.com/OPYCpt8.jpg" alt="CHANNEL5">
+      <div class="channel-item" data-category="music" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209592/master.m3u8')">
+        <img src="https://imgur.com/RMCYFj2.jpg" alt="5" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209869/master.m3u8')">
-        <img src="https://imgur.com/QgUjPdA.jpeg" alt="6">
+      <div class="channel-item" data-category="cartoon" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209611/master.m3u8')">
+        <img src="https://imgur.com/uSo83Ei.jpg" alt="6" />
       </div>
-<div class="channel-item" onclick="changeStream('https://srknowapp.ncare.live/srktvhlswodrm/srktv.stream/playlist.m3u8')">
-        <img src="https://imgur.com/qmoX4Ea.jpeg" alt="7">
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://live-bangla.akamaized.net/liveabr/pub-iobanglakp3sff/live_720p/chunks.m3u8')">
+        <img src="https://imgur.com/hZwimQt.jpeg" alt="7" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209622/master.m3u8')">
-        <img src="https://imgur.com/8k4AFOG.jpeg" alt="8">
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://byphdgllyk.gpcdn.net/hls/deeptotv/index.m3u8')">
+        <img src="https://imgur.com/OPYCpt8.jpg" alt="8" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209617/master.m3u8')">
-        <img src="https://imgur.com/Rc19of1.jpeg" alt="9">
+      <div class="channel-item" data-category="cartoon" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209869/master.m3u8')">
+        <img src="https://imgur.com/QgUjPdA.jpeg" alt="9" />
       </div>
-<div class="channel-item" onclick="changeStream('https://smart.bengaldigital.live/Star-jalsha/index.m3u8')">
-        <img src="https://imgur.com/ME3rS54.jpg" alt="10">
+      <div class="channel-item" data-category="cartoon" onclick="changeStream('https://srknowapp.ncare.live/srktvhlswodrm/srktv.stream/playlist.m3u8')">
+        <img src="https://imgur.com/qmoX4Ea.jpeg" alt="10" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://smart.bengaldigital.live/sun-bangla-paid/tracks-v1a1/mono.ts.m3u8')">
-        <img src="https://imgur.com/OSOCJiJ.jpg" alt="11">
+      <div class="channel-item" data-category="cartoon" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209622/master.m3u8')">
+        <img src="https://imgur.com/8k4AFOG.jpeg" alt="11" />
       </div>
-      <div class="channel-item" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209593/master.m3u8')">
-        <img src="https://imgur.com/h8B5O5y.jpg" alt="12">
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://cloudfrontnet.vercel.app/tplay/playout/209617/master.m3u8')">
+        <img src="https://imgur.com/Rc19of1.jpeg" alt="12" />
       </div>
-      <!-- Add more channels similarly -->
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://smart.bengaldigital.live/Star-jalsha/index.m3u8')">
+        <img src="https://imgur.com/ME3rS54.jpg" alt="Star_Jalsha" />
+      </div>
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://smart.bengaldigital.live/sun-bangla-paid/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://imgur.com/OSOCJiJ.jpg" alt="Sun_Bangla" />
+      </div>
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://tvsen5.aynaott.com/u3LkNQ7UHhFX/index.m3u8')">
+        <img src="https://imgur.com/yKZ0BIt.jpg" alt="Colors_Bangla" />
+      </div>
+      <div class="channel-item" data-category="music" onclick="changeStream('https://tiger-hub.vercel.app/Sangeet-Bangla/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://imgur.com/MIuCoq1.jpg" alt="Sangeet Bangla" />
+      </div>
+      <div class="channel-item" data-category="drama" onclick="changeStream('https://tiger-hub.vercel.app/Sony-aath/tracks-v1a1/mono.ts.m3u8')">
+        <img src="https://imgur.com/wwzJh4I.jpg" alt="Sony Aath" />
+      </div>
+      <div class="channel-item" data-category="cartoon" onclick="changeStream('https://tiger-hub.vercel.app/Discovery-bangla/tracks-v1a1/mono.m3u8')">
+        <img src="https://imgur.com/ZHgJRpr.jpg" alt="Discovery-bangla" />
+      </div>
+<div class="channel-item" data-category="drama" onclick="changeStream('https://tv.bongoflix.top/toffee/live.php?id=2bec2112b890&e=.m3u8')">
+        <img src="https://imgur.com/8WuI5Pj.jpg" alt="Dd" />
+      </div>
+<div class="channel-item" data-category="drama" onclick="changeStream('https://tv.bongoflix.top/toffee/live.php?id=598a5e7df0bd&e=.m3u8')">
+        <img src="https://imgur.com/UL7WFXG.jpg" alt="hum sitaray" />
+      </div>
+<div class="channel-item" data-category="drama" onclick="changeStream('https://tv.bongoflix.top/toffee/live.php?id=7c21a8ade135&e=.m3u8')">
+        <img src="https://imgur.com/elbMuDt.jpg" alt="Hum-TV" />
+      </div>
     </div>
-  </div>
-
-  <div class="back-button">
-    <a href="index.html">🔙</a>
   </div>
 
   <script>
@@ -209,7 +247,35 @@
       player.src({ type: 'application/x-mpegURL', src: url });
       player.play();
     }
-  </script>
 
+    function filterChannels(category) {
+      const items = document.querySelectorAll('.channel-item');
+      items.forEach(item => {
+        if (category === 'all' || item.dataset.category === category) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBhCpb9RsVdf9jsFqJFtJQBXMz5uZBj4xo",
+      databaseURL: "https://rs-sportsfy-34ab8-default-rtdb.firebaseio.com",
+      projectId: "rs-sportsfy-34ab8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const viewersRef = db.ref("liveViewers");
+
+    const viewerId = Date.now();
+    viewersRef.child(viewerId).set(true);
+    viewersRef.child(viewerId).onDisconnect().remove();
+
+    viewersRef.on("value", (snapshot) => {
+      const count = snapshot.numChildren();
+      document.getElementById("viewerCount").innerText = `LIVE : ${count}`;
+    });
+  </script>
 </body>
 </html>
